@@ -8,6 +8,8 @@ import { authConfig } from './auth.config';
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
     ...authConfig,
+    secret: process.env.AUTH_SECRET,
+    trustHost: true,
     providers: [
         Credentials({
             credentials: {
@@ -42,7 +44,11 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                         role: user.role,
                     };
                 } catch (error) {
-                    console.error('Authorization error:', error);
+                    console.error('CRITICAL: authorize function failed:', error);
+                    // Re-throw if it's a database error to distinguish from invalid credentials
+                    if (error instanceof Error && error.message.includes('DATABASE_URL')) {
+                        throw error;
+                    }
                     return null;
                 }
             },
