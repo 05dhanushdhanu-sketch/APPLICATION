@@ -6,16 +6,8 @@ import { eq } from 'drizzle-orm';
 import { compare } from 'bcryptjs';
 import { authConfig } from './auth.config';
 
-// Validate environment variables
-if (!process.env.AUTH_SECRET) {
-    throw new Error('AUTH_SECRET environment variable is not set');
-}
-
 export const { auth, signIn, signOut, handlers } = NextAuth({
     ...authConfig,
-    secret: process.env.AUTH_SECRET,
-    trustHost: true,
-    debug: process.env.NODE_ENV === 'development',
     providers: [
         Credentials({
             credentials: {
@@ -26,7 +18,6 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                 try {
                     const { email, password } = credentials ?? {};
                     if (!email || !password) {
-                        console.log('Missing email or password');
                         return null;
                     }
 
@@ -35,14 +26,12 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                     });
 
                     if (!user) {
-                        console.log('User not found');
                         return null;
                     }
 
                     const passwordsMatch = await compare(String(password), user.password);
 
                     if (!passwordsMatch) {
-                        console.log('Invalid password');
                         return null;
                     }
 
@@ -51,7 +40,6 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                         email: user.email,
                         name: user.name,
                         role: user.role,
-                        isApproved: user.isApproved,
                     };
                 } catch (error) {
                     console.error('Authorization error:', error);
