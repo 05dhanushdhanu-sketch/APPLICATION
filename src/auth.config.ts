@@ -1,8 +1,6 @@
 import type { NextAuthConfig } from 'next-auth';
 
 export const authConfig = {
-    secret: process.env.AUTH_SECRET,
-    trustHost: true,
     pages: {
         signIn: '/login',
     },
@@ -25,10 +23,7 @@ export const authConfig = {
             if (isOnDashboard || isOnAdmin) {
                 if (isLoggedIn) return true;
                 return false; // Redirect unauthenticated users to login page
-            } else if (isLoggedIn) {
-                // Redirect logged-in users away from public pages like login/signup? 
-                // Or strictly strictly only if they visit /login directly.
-                // For now, let's keep it simple.
+            } else if (isLoggedIn && (nextUrl.pathname === '/' || nextUrl.pathname === '/login' || nextUrl.pathname === '/register')) {
                 return Response.redirect(new URL('/dashboard', nextUrl));
             }
             return true;
